@@ -1,0 +1,21 @@
+[project]
+name = "langgraph-agent-assistant"
+version = "0.1.0"
+description = "A multi-task AI Agent assistant built with LangGraph"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.6.0,<2",
+    "langchain-core>=1.3.3",
+    "langchain-openai",
+    "python-dotenv",
+]
+
+[build-system]
+requires = ["setuptools>=73.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["agent"]
+
+[tool.setuptools.package-dir]
+"agent" = "src/agent"
