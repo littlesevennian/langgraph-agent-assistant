@@ -114,13 +114,24 @@ def call_llm(prompt: str) -> str:
     
 
 def route_task(state: State) -> str:
+
     task_type = state["task_type"]
+    confidence = state["confidence"]
+
+    if confidence < 0.8:
+        return "fallback_response"
+
     if task_type == "resume":
         return "resume_response"
+
     elif task_type == "project":
         return "project_response"
-    else:
+
+    elif task_type == "learning":
         return "learning_response"
+
+    else:
+        return "fallback_response"
     
 
 def generate_resume_advice(analysis_result: str) -> str:
@@ -224,16 +235,37 @@ def learning_response(state: State) -> dict:
         "messages": [message]
     }
 
+def fallback_response(state: State):
+
+    user_input = state["user_input"]
+
+    answer=f"""
+我目前无法准确判断：
+
+"{user_input}"
+
+您的目标。
+
+请进一步说明：
+
+1. 是否希望开发Agent项目？
+2. 是否希望学习Agent技术？
+3. 是否希望用于求职？
+"""
+
+
 workflow = StateGraph(State)
 workflow.add_node("intent_classifier",intent_classifier_node)
 workflow.add_node("resume_response", resume_response)
 workflow.add_node("project_response", project_response)
 workflow.add_node("learning_response", learning_response)
+workflow.add_node("fallback_response",fallback_response)
 workflow.add_edge(START,"intent_classifier")
 workflow.add_conditional_edges("intent_classifier",route_task)
 workflow.add_edge("resume_response", END)
 workflow.add_edge("project_response", END)
 workflow.add_edge("learning_response", END)
+workflow.add_edge("fallback_response",END)
 
 
 graph = workflow.compile()
