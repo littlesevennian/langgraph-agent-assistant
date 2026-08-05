@@ -48,8 +48,17 @@ temperature = float(
     )
 )
 
+confidence_threshold = float(
+    os.getenv(
+        "INTENT_CONFIDENCE_THRESHOLD",
+        "0.8"
+    )
+)
+
+
 if not api_key:
     raise ValueError("DASHSCOPE_API_KEY未配置")
+
 
 llm = ChatOpenAI(
     model=model,
@@ -58,7 +67,9 @@ llm = ChatOpenAI(
     temperature=temperature
 )
 
+
 structured_llm = llm.with_structured_output(IntentResult)
+
 
 def intent_classifier_node(state: State) -> dict:
 
@@ -118,7 +129,7 @@ def route_task(state: State) -> str:
     task_type = state["task_type"]
     confidence = state["confidence"]
 
-    if confidence < 0.8:
+    if confidence < confidence_threshold:
         return "fallback_response"
 
     if task_type == "resume":
@@ -235,24 +246,28 @@ def learning_response(state: State) -> dict:
         "messages": [message]
     }
 
-def fallback_response(state: State):
-
+def fallback_response(state: State) -> dict:
     user_input = state["user_input"]
 
-    answer=f"""
-我目前无法准确判断：
+    answer = f"""
+我暂时无法准确判断您关于：
 
 "{user_input}"
 
-您的目标。
+的具体需求。
 
-请进一步说明：
+请进一步说明您的目标：
 
-1. 是否希望开发Agent项目？
-2. 是否希望学习Agent技术？
-3. 是否希望用于求职？
+1. Agent学习路线
+2. Agent项目开发
+3. 求职和面试准备
 """
+    message = AIMessage(content=answer)
 
+    return {
+        "final_answer": answer,
+        "messages": [message]
+    }
 
 workflow = StateGraph(State)
 workflow.add_node("intent_classifier",intent_classifier_node)
