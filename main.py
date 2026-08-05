@@ -14,18 +14,11 @@ def main():
 
     result = graph.invoke(initial_state)
 
-    print("\n===== 任务类型 =====")
-    print(result["task_type"])
 
-    print("\n===== 分析结果 =====")
-    print(result["analysis_result"])
-
-    print("\n===== 最终回答 =====")
-    print(result["final_answer"])
-
-    for msg in result["messages"]:
-        print(msg.content)
-
-
+    print("任务类型:", result["task_type"])
+    print("置信度:", result["confidence"])
+    print("分析:", result["analysis_result"])
+    print("回答:", result["final_answer"])
+    
 if __name__ == "__main__":
     main()
