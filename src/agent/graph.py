@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 from collections.abc import Sequence
 from typing import Annotated, TypedDict
+from pydantic import BaseModel
 
 from langchain_core.messages import AIMessage, BaseMessage
 from langchain_openai import ChatOpenAI
@@ -17,51 +18,98 @@ class State(TypedDict):
     messages: Annotated[Sequence[BaseMessage], add_messages]
     user_input: str
     task_type: str
+    confidence: float
     analysis_result: str
     final_answer: str
 
 
-def analyze_input(state: State) -> dict:
+class IntentResult(BaseModel):
+    task_type: str
+    confidence: float
+    reason: str
+
+
+api_key = os.getenv("DASHSCOPE_API_KEY")
+
+base_url = os.getenv(
+    "DASHSCOPE_BASE_URL",
+    "https://dashscope.aliyuncs.com/compatible-mode/v1"
+)
+
+model = os.getenv(
+    "DASHSCOPE_MODEL",
+    "qwen3.7-max"
+)
+
+temperature = float(
+    os.getenv(
+        "DASHSCOPE_TEMPERATURE",
+        "0.7"
+    )
+)
+
+if not api_key:
+    raise ValueError("DASHSCOPE_API_KEY未配置")
+
+llm = ChatOpenAI(
+    model=model,
+    api_key=api_key,
+    base_url=base_url,
+    temperature=temperature
+)
+
+structured_llm = llm.with_structured_output(IntentResult)
+
+def intent_classifier_node(state: State) -> dict:
+
     user_input = state["user_input"]
-    user_input_lower = user_input.lower()
-    if "求职" in user_input or "简历" in user_input or "找工作" in user_input:
-        task_type = "resume"
-        analysis_result = "用户目标是求职准备。"
-    elif "github" in user_input_lower or "项目" in user_input_lower or "复刻" in user_input_lower:
-        task_type = "project"
-        analysis_result = "用户目标是复刻 GitHub 项目。"
-    else:
-        task_type = "learning"
-        analysis_result = "用户目标是 Agent 学习。"
+
+    prompt = f"""
+你是一个任务分类Agent。
+
+根据用户输入判断任务类型。
+
+只能从以下三个类型选择：
+
+resume:
+求职、简历优化、面试准备。
+
+project:
+项目开发、GitHub项目复刻、项目分析。
+
+learning:
+Agent学习、技术路线规划、概念学习。
+
+
+用户输入：
+
+{user_input}
+
+
+输出要求：
+
+1. task_type必须是三个选项之一。
+2. confidence必须在0到1之间。
+3. reason说明判断依据。
+4. 不输出额外字段。
+"""
     
+    result = structured_llm.invoke(prompt)
 
     return {
-        "task_type": task_type,
-        "analysis_result": analysis_result
+        "task_type": result.task_type,
+        "confidence": result.confidence,
+        "analysis_result": result.reason
     }
 
 
 def call_llm(prompt: str) -> str:
-    api_key = os.getenv("DASHSCOPE_API_KEY")
-    base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-    model = os.getenv("DASHSCOPE_MODEL", "qwen3-max")
-    temperature = float(os.getenv("DASHSCOPE_TEMPERATURE", "0.7"))
-
-    if not api_key:
-        return f"当前未配置 API Key，以下为本地兜底结果：{prompt[:100]}..."
-
     try:
-        llm = ChatOpenAI(
-            model=model,
-            api_key=api_key,
-            base_url=base_url,
-            temperature=temperature
-        )
         response = llm.invoke(prompt)
-
         return response.content
+
     except Exception as e:
-        return f"LLM 调用失败，已返回本地兜底结果。错误信息：{str(e)}"
+        return f"LLM调用失败:{e}"
     
     
 
@@ -76,22 +124,31 @@ def route_task(state: State) -> str:
     
 
 def generate_resume_advice(analysis_result: str) -> str:
+
     prompt = f"""
 你是一个 Agent 项目简历优化助手。
 
 当前用户分析结果：
+
 {analysis_result}
 
-请根据这个分析结果，给用户生成一段求职和简历优化建议。
+
+请根据这个分析结果，给用户生成求职和简历优化建议。
+
 
 要求：
-1. 说明这个 Agent 项目应该如何写成简历项目经历。
-2. 给出 3 个简历表达重点。
+
+1. 说明这个Agent项目应该如何写成简历项目经历。
+
+2. 给出3个简历表达重点。
+
 3. 语言具体，不要空泛。
+
 4. 不要编造用户没有提供的技术栈。
 """
-    
+
     return call_llm(prompt)
+
 
 
 def generate_project_advice(analysis_result: str) -> str:
@@ -168,12 +225,12 @@ def learning_response(state: State) -> dict:
     }
 
 workflow = StateGraph(State)
-workflow.add_node("analyze_input", analyze_input)
+workflow.add_node("intent_classifier",intent_classifier_node)
 workflow.add_node("resume_response", resume_response)
 workflow.add_node("project_response", project_response)
 workflow.add_node("learning_response", learning_response)
-workflow.add_edge(START, "analyze_input")
-workflow.add_conditional_edges("analyze_input", route_task)
+workflow.add_edge(START,"intent_classifier")
+workflow.add_conditional_edges("intent_classifier",route_task)
 workflow.add_edge("resume_response", END)
 workflow.add_edge("project_response", END)
 workflow.add_edge("learning_response", END)
