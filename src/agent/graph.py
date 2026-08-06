@@ -9,7 +9,12 @@ from langchain_core.messages import AIMessage, BaseMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
+from langchain_core.messages import HumanMessage
 
+from langgraph.prebuilt import ToolNode, tools_condition
+from .tools.github_tool import github_analyzer
+
+from langchain_core.messages import SystemMessage
 
 load_dotenv()
 
@@ -68,6 +73,13 @@ llm = ChatOpenAI(
 )
 
 
+llm_with_tools = llm.bind_tools(
+    [
+        github_analyzer
+    ]
+)
+
+
 structured_llm = llm.with_structured_output(IntentResult)
 
 
@@ -110,9 +122,9 @@ Agent学习、技术路线规划、概念学习。
     return {
         "task_type": result.task_type,
         "confidence": result.confidence,
-        "analysis_result": result.reason
+        "analysis_result": result.reason,
+        "messages": [HumanMessage(content=user_input)]
     }
-
 
 def call_llm(prompt: str) -> str:
     try:
@@ -136,7 +148,7 @@ def route_task(state: State) -> str:
         return "resume_response"
 
     elif task_type == "project":
-        return "project_response"
+        return "project_agent"
 
     elif task_type == "learning":
         return "learning_response"
@@ -172,26 +184,6 @@ def generate_resume_advice(analysis_result: str) -> str:
     return call_llm(prompt)
 
 
-
-def generate_project_advice(analysis_result: str) -> str:
-    prompt = f"""
-你是一个 Agent 项目训练助手。
-
-当前用户分析结果：
-{analysis_result}
-
-请根据这个分析结果，给用户生成一段项目复刻建议。
-
-要求：
-1. 说明用户当前应该先做什么。
-2. 给出 3 个具体步骤。
-3. 语言简洁，适合初学者理解。
-4. 不要编造用户没有提供的信息。
-"""
-    
-    return call_llm(prompt)
-
-
 def generate_learning_advice(analysis_result: str) -> str:
     prompt = f"""
 你是一个 Agent 学习路线规划助手。
@@ -223,16 +215,20 @@ def resume_response(state: State) -> dict:
     }
 
 
-def project_response(state: State) -> dict:
-    analysis_result = state["analysis_result"]
-    final_answer = generate_project_advice(analysis_result)
-    message = AIMessage(content=final_answer)
+def project_agent(state: State) -> dict:
 
+    messages = state["messages"]
 
-    return {
-        "final_answer": final_answer,
-        "messages": [message]
+    response = llm_with_tools.invoke(messages)
+
+    update = {
+        "messages":[response]
     }
+
+    if response.content:
+        update["final_answer"] = response.content
+
+    return update
 
 
 def learning_response(state: State) -> dict:
@@ -269,18 +265,30 @@ def fallback_response(state: State) -> dict:
         "messages": [message]
     }
 
+
+tools = [
+    github_analyzer
+]
+
+
+tool_node = ToolNode(tools)
+
+
 workflow = StateGraph(State)
 workflow.add_node("intent_classifier",intent_classifier_node)
 workflow.add_node("resume_response", resume_response)
-workflow.add_node("project_response", project_response)
+workflow.add_node("project_agent",project_agent)
 workflow.add_node("learning_response", learning_response)
 workflow.add_node("fallback_response",fallback_response)
+workflow.add_node("tools",tool_node)
+
 workflow.add_edge(START,"intent_classifier")
 workflow.add_conditional_edges("intent_classifier",route_task)
 workflow.add_edge("resume_response", END)
-workflow.add_edge("project_response", END)
 workflow.add_edge("learning_response", END)
 workflow.add_edge("fallback_response",END)
+workflow.add_conditional_edges("project_agent",tools_condition)
+workflow.add_edge("tools","project_agent")
 
 
 graph = workflow.compile()
