@@ -17,6 +17,7 @@ from .tools.github_tool import github_analyzer
 from langchain_core.messages import SystemMessage
 
 from .state import State
+from .llm import llm, llm_with_tools
 
 load_dotenv()
 
@@ -28,24 +29,6 @@ class IntentResult(BaseModel):
     reason: str
 
 
-api_key = os.getenv("DASHSCOPE_API_KEY")
-
-base_url = os.getenv(
-    "DASHSCOPE_BASE_URL",
-    "https://dashscope.aliyuncs.com/compatible-mode/v1"
-)
-
-model = os.getenv(
-    "DASHSCOPE_MODEL",
-    "qwen3.7-max"
-)
-
-temperature = float(
-    os.getenv(
-        "DASHSCOPE_TEMPERATURE",
-        "0.7"
-    )
-)
 
 confidence_threshold = float(
     os.getenv(
@@ -54,24 +37,6 @@ confidence_threshold = float(
     )
 )
 
-
-if not api_key:
-    raise ValueError("DASHSCOPE_API_KEY未配置")
-
-
-llm = ChatOpenAI(
-    model=model,
-    api_key=api_key,
-    base_url=base_url,
-    temperature=temperature
-)
-
-
-llm_with_tools = llm.bind_tools(
-    [
-        github_analyzer
-    ]
-)
 
 
 structured_llm = llm.with_structured_output(IntentResult)
