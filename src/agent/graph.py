@@ -22,12 +22,10 @@ from .llm import llm, llm_with_tools
 load_dotenv()
 
 
-
 class IntentResult(BaseModel):
     task_type: str
     confidence: float
     reason: str
-
 
 
 confidence_threshold = float(
@@ -36,7 +34,6 @@ confidence_threshold = float(
         "0.8"
     )
 )
-
 
 
 structured_llm = llm.with_structured_output(IntentResult)

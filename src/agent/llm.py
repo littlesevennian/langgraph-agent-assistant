@@ -9,28 +9,39 @@ from .tools.github_tool import github_analyzer
 load_dotenv()
 
 
-api_key = os.getenv("API_KEY")
+api_key = os.getenv( "LLM_API_KEY")
 
-base_url = os.getenv("BASE_URL")
+base_url = os.getenv("LLM_BASE_URL")
 
 model_name = os.getenv(
-    "MODEL_NAME",
+    "LLM_MODEL",
     "qwen3.7-max"
 )
 
 temperature = float(
     os.getenv(
-        "TEMPERATURE",
+        "LLM_TEMPERATURE",
         "0.7"
     )
 )
+
+if not api_key:
+    raise ValueError(
+        "LLM_API_KEY is missing"
+    )
+
+
+if not base_url:
+    raise ValueError(
+        "LLM_BASE_URL is missing"
+    )
 
 
 llm = ChatOpenAI(
     model=model_name,
     api_key=api_key,
     base_url=base_url,
-    temperature=0.7
+    temperature=temperature
 )
 
 
