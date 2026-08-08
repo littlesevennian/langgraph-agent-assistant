@@ -16,16 +16,10 @@ from .tools.github_tool import github_analyzer
 
 from langchain_core.messages import SystemMessage
 
+from .state import State
+
 load_dotenv()
 
-
-class State(TypedDict):
-    messages: Annotated[Sequence[BaseMessage], add_messages]
-    user_input: str
-    task_type: str
-    confidence: float
-    analysis_result: str
-    final_answer: str
 
 
 class IntentResult(BaseModel):
