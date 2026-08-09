@@ -10,11 +10,16 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from .tools.github_tool import github_analyzer
 
 
-
 from .state import State
 from .llm import llm, llm_with_tools
+
 from .nodes.intent import intent_classifier_node
+
 from .nodes.resume import resume_response
+
+from .nodes.learning import learning_response
+
+from .nodes.fallback import fallback_response
 
 load_dotenv()
 
@@ -58,31 +63,6 @@ def route_task(state: State) -> str:
         return "fallback_response"
     
 
-
-
-
-def generate_learning_advice(analysis_result: str) -> str:
-    prompt = f"""
-你是一个 Agent 学习路线规划助手。
-
-当前用户分析结果：
-{analysis_result}
-
-请根据这个分析结果，给用户生成一段 Agent 学习建议。
-
-要求：
-1. 说明用户当前应该补充哪个基础概念。
-2. 给出 3 个练习任务。
-3. 语言清晰，避免复杂术语。
-4. 不要直接跳到高级框架源码。
-"""
-    
-    return call_llm(prompt)
-
-
-
-
-
 def project_agent(state: State) -> dict:
 
     messages = state["messages"]
@@ -99,39 +79,6 @@ def project_agent(state: State) -> dict:
     return update
 
 
-def learning_response(state: State) -> dict:
-    analysis_result = state["analysis_result"]
-    final_answer = generate_learning_advice(analysis_result)
-    message = AIMessage(content=final_answer)
-
-
-    return {
-        "final_answer": final_answer,
-        "messages": [message]
-    }
-
-def fallback_response(state: State) -> dict:
-    user_input = state["user_input"]
-
-    answer = f"""
-我暂时无法准确判断您关于：
-
-"{user_input}"
-
-的具体需求。
-
-请进一步说明您的目标：
-
-1. Agent学习路线
-2. Agent项目开发
-3. 求职和面试准备
-"""
-    message = AIMessage(content=answer)
-
-    return {
-        "final_answer": answer,
-        "messages": [message]
-    }
 
 
 tools = [
