@@ -1,27 +1,22 @@
 import os
+
+
 from dotenv import load_dotenv
 
-from langchain_core.messages import AIMessage
 from langgraph.graph import END, START, StateGraph
-from langgraph.graph.message import add_messages
-
-
 from langgraph.prebuilt import ToolNode, tools_condition
+
+
 from .tools.github_tool import github_analyzer
 
-
 from .state import State
-from .llm import llm, llm_with_tools
 
 from .nodes.intent import intent_classifier_node
-
 from .nodes.resume import resume_response
-
 from .nodes.learning import learning_response
-
 from .nodes.fallback import fallback_response
-
 from .nodes.project import project_agent
+
 
 load_dotenv()
 
@@ -33,15 +28,6 @@ confidence_threshold = float(
     )
 )
 
-
-def call_llm(prompt: str) -> str:
-    try:
-        response = llm.invoke(prompt)
-        return response.content
-
-    except Exception as e:
-        return f"LLM调用失败:{e}"
-    
 
 
 def route_task(state: State) -> str:
