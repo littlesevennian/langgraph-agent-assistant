@@ -21,6 +21,8 @@ from .nodes.learning import learning_response
 
 from .nodes.fallback import fallback_response
 
+from .nodes.project import project_agent
+
 load_dotenv()
 
 
@@ -40,7 +42,7 @@ def call_llm(prompt: str) -> str:
     except Exception as e:
         return f"LLM调用失败:{e}"
     
-    
+
 
 def route_task(state: State) -> str:
 
@@ -62,24 +64,6 @@ def route_task(state: State) -> str:
     else:
         return "fallback_response"
     
-
-def project_agent(state: State) -> dict:
-
-    messages = state["messages"]
-
-    response = llm_with_tools.invoke(messages)
-
-    update = {
-        "messages":[response]
-    }
-
-    if response.content:
-        update["final_answer"] = response.content
-
-    return update
-
-
-
 
 tools = [
     github_analyzer
