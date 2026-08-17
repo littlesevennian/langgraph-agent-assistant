@@ -1,24 +1,49 @@
 from src.agent.graph import graph
 
+from langchain_core.messages import HumanMessage
+
 
 def main():
-    user_input = input("请输入你的问题或目标：")
+    config = {
+            "configurable": {
+                "thread_id": "user_001"
+            }
+        }
 
-    initial_state = {
-        "messages": [],
-        "user_input": user_input,
-        "task_type": "",
-        "analysis_result": "",
-        "final_answer": ""
-    }
+     
+    while True:
 
-    result = graph.invoke(initial_state)
+        user_input = input(
+            "请输入:"
+        )
+
+        if user_input == "exit":
+            break
 
 
-    print("任务类型:", result["task_type"])
-    print("置信度:", result["confidence"])
-    print("分析:", result["analysis_result"])
-    print("回答:", result["final_answer"])
+        initial_state = {
+            "user_input": user_input,
+            "messages": [
+                HumanMessage(content=user_input)
+            ],
+            "task_type":"",
+            "confidence":0,
+            "analysis_result":"",
+            "final_answer":""
+        }
+
+        
+        result = graph.invoke(
+            initial_state,
+            config=config
+        )
+       
+        print("任务类型:", result["task_type"])
+        print("置信度:", result["confidence"])
+        print("分析:", result["analysis"])
+        print("回答:", result["final_answer"])
+        print(result["messages"])
+   
     
 if __name__ == "__main__":
     main()

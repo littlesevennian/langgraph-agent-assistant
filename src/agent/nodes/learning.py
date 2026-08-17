@@ -26,7 +26,7 @@ def generate_learning_advice(analysis_result: str) -> str:
 
 
 def learning_response(state: State) -> dict:
-    analysis_result = state["analysis_result"]
+    analysis_result = state["analysis"]
     final_answer = generate_learning_advice(analysis_result)
     message = AIMessage(content=final_answer)
 

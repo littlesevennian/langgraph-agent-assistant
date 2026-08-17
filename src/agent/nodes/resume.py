@@ -31,7 +31,7 @@ def generate_resume_advice(analysis_result: str) -> str:
 
 
 def resume_response(state: State) -> dict:
-    analysis_result = state["analysis_result"]
+    analysis_result = state["analysis"]
     final_answer = generate_resume_advice(analysis_result)
     message = AIMessage(content=final_answer)
 
