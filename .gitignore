@@ -23,3 +23,20 @@ env/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Sensitive data
+.env
+user_profile.json
+
+# Local temporary files
+main_backup.py
+project_structure.txt
+
+# Python cache
+__pycache__/
+*.pyc
+.venv/
+
+# Logs
+logs/
+*.log

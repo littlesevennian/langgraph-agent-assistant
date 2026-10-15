@@ -1,25 +1,23 @@
 from ..state import State
 from ..llm import llm
-
+from ..utils.llm_client import invoke_llm
 from langchain_core.messages import AIMessage
+from ..utils.errors import AgentError,ErrorType
+from ..prompts.learning import LEARNING_PROMPT
+
+
 
 def generate_learning_advice(analysis_result: str) -> str:
-    prompt = f"""
-你是一个 Agent 学习路线规划助手。
 
-当前用户分析结果：
-{analysis_result}
+    prompt = LEARNING_PROMPT.format(
+        analysis_result = analysis_result
+    )
 
-请根据这个分析结果，给用户生成一段 Agent 学习建议。
-
-要求：
-1. 说明用户当前应该补充哪个基础概念。
-2. 给出 3 个练习任务。
-3. 语言清晰，避免复杂术语。
-4. 不要直接跳到高级框架源码。
-"""
-    
-    response = llm.invoke(prompt)
+    response = invoke_llm(
+        runnable=llm,
+        input_data=prompt,
+        caller="learning_agent"
+    )
 
     return response.content
 

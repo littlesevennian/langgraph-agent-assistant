@@ -1,38 +1,26 @@
 from ..llm import llm
 from ..memory.profile_store import load_profile
+from ..utils.llm_client import invoke_llm
+from ..prompts.memory_query import MEMORY_QUERY_PROMPT
+
+
 def memory_query_response(state):
 
     messages = state["messages"]
     profile = load_profile()
+    user_input = state["user_input"]
 
-    prompt = f"""
+    prompt = MEMORY_QUERY_PROMPT.format(
+        profile=profile,
+        messages=messages,
+        user_input=user_input
+    )
 
-你是一个记忆查询助手。
-
-
-长期用户信息:
-
-{profile}
-
-
-近期对话:
-
-{messages}
-
-
-当前问题:
-
-{state["user_input"]}
-
-
-请优先使用长期用户信息回答。
-
-如果长期信息和历史对话都没有，
-明确说明不知道。
-
-"""
-
-    response = llm.invoke(prompt)
+    response = invoke_llm(
+        runnable=llm,
+        input_data=prompt,
+        caller="memory_query"
+    )
 
     return {
         "final_answer": response.content

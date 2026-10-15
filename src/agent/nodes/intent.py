@@ -1,66 +1,89 @@
 from ..state import State
 from ..llm import llm
-from pydantic import BaseModel
+from ..utils.llm_client import invoke_llm
+from ..utils.logger import setup_logger
+from ..utils.errors import (AgentError, ErrorType)
+from ..utils.parser import parse_json_response
+from typing import Literal
+from pydantic import ValidationError
+from ..schemas.intent import IntentResult
+from ..prompts.intent import INTENT_PROMPT
+
+logger = setup_logger(
+    "agent.intent_classifier"
+)
 
 
-class IntentResult(BaseModel):
-    task_type: str
-    confidence: float
-    reason: str
+
+intent_llm = llm
 
 
-structured_llm = llm.with_structured_output(IntentResult)
+def classify_intent(user_input: str, messages: list) -> IntentResult:
+    
+    prompt = INTENT_PROMPT.format(
+    messages=messages,
+    user_input=user_input
+)
 
+    
+    result = invoke_llm(
+        runnable=intent_llm,
+        input_data=prompt,
+        caller="intent_classifier"
+    )
 
+    try:
+        data = parse_json_response(result.content)
+    except AgentError as e:
+        logger.warning(
+            "Intent parse failed raw_content=%r error=%s",
+            result.content,
+            e
+        )
+        raise
+      
+    try:
+
+        intent_result = IntentResult(**data)
+
+    except ValidationError as e:
+
+        raise AgentError(
+            ErrorType.VALIDATION_ERROR,
+            f"Intent输出校验失败: {e}"
+        )from e
+    
+    return intent_result
+
+    
 def intent_classifier_node(state: State) -> dict:
     user_input = state["user_input"]
     messages = state["messages"]
 
-    prompt = f"""
-你是一个任务分类Agent。
+    try:
+        intent_result = classify_intent(
+            user_input=user_input,
+            messages=messages
+        )
 
-请结合历史对话和当前用户输入，判断当前用户需求。
+    except AgentError as e:
+        logger.warning(
+            "Intent classifier degraded "
+            "route=fallback error=%s",
+            e
+        )
 
-任务类型只能从以下类型选择：
-
-resume:
-求职、简历优化、面试准备。
-
-project:
-项目开发、GitHub项目复刻、项目分析。
-
-learning:
-Agent学习、技术路线规划、概念学习。
-
-memory_query:
-询问历史对话中的个人信息、背景、之前提到的信息。
-例如：
-- 我的职业是什么？
-- 我之前告诉你什么？
-- 我的项目是什么？
-- 你还记得我的背景吗？
-
-
-历史对话：
-{messages}
-
-当前用户输入：
-{user_input}
-
-
-输出要求：
-
-1. task_type必须是resume、project、learning之一。
-2. confidence必须在0到1之间。
-3. reason说明判断依据。
-4. 判断当前输入时，应结合历史对话理解省略的信息。
-"""
-
-    result = structured_llm.invoke(prompt)
+        return {
+            "task_type": "fallback",
+            "confidence": 0.0,
+            "analysis": (
+                "Intent classification failed; "
+                "routed to fallback safely."
+            )
+        }
 
     return {
-        "task_type": result.task_type,
-        "confidence": result.confidence,
-        "analysis": result.reason,
+        "task_type": intent_result.task_type,
+        "confidence": intent_result.confidence,
+        "analysis": intent_result.reason
     }
-

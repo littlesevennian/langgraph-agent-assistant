@@ -1,0 +1,201 @@
+{
+  "evaluation_name": "intent_classifier",
+  "started_at_utc": "2026-10-09T03:34:42.228516+00:00",
+  "finished_at_utc": "2026-10-09T03:34:56.605748+00:00",
+  "prompt_version": "v3",
+  "model_id": "unknown",
+  "dataset_path": "D:\\agent\\project_root\\eval\\intent_holdout_cases.json",
+  "dataset_sha256": "bfed1a939bef9c0e65b1a211d7da63590f5123ab77aee9997e1ef1e671740307",
+  "metrics": {
+    "total_cases": 10,
+    "execution_successes": 10,
+    "execution_failures": 0,
+    "classification_correct": 10,
+    "classification_errors": 0,
+    "execution_success_rate": 1.0,
+    "valid_classification_accuracy": 1.0,
+    "overall_correct_rate": 1.0
+  },
+  "by_difficulty": {
+    "easy": {
+      "total": 0,
+      "executed": 0,
+      "correct": 0,
+      "classification_errors": 0,
+      "execution_failures": 0
+    },
+    "normal": {
+      "total": 0,
+      "executed": 0,
+      "correct": 0,
+      "classification_errors": 0,
+      "execution_failures": 0
+    },
+    "boundary": {
+      "total": 10,
+      "executed": 10,
+      "correct": 10,
+      "classification_errors": 0,
+      "execution_failures": 0
+    }
+  },
+  "by_intent": {
+    "resume": {
+      "total": 2,
+      "executed": 2,
+      "correct": 2,
+      "classification_errors": 0,
+      "execution_failures": 0
+    },
+    "project": {
+      "total": 2,
+      "executed": 2,
+      "correct": 2,
+      "classification_errors": 0,
+      "execution_failures": 0
+    },
+    "learning": {
+      "total": 2,
+      "executed": 2,
+      "correct": 2,
+      "classification_errors": 0,
+      "execution_failures": 0
+    },
+    "memory_query": {
+      "total": 2,
+      "executed": 2,
+      "correct": 2,
+      "classification_errors": 0,
+      "execution_failures": 0
+    },
+    "fallback": {
+      "total": 2,
+      "executed": 2,
+      "correct": 2,
+      "classification_errors": 0,
+      "execution_failures": 0
+    }
+  },
+  "results": [
+    {
+      "id": "holdout_resume_001",
+      "input": "我做过一个工业网关项目，但不知道怎么写进简历才能突出技术难点",
+      "difficulty": "boundary",
+      "expected": "resume",
+      "actual": "resume",
+      "confidence": 0.98,
+      "reason": "用户的核心请求是如何将工业网关项目写进简历并突出技术难点，属于简历编写与优化相关的求职任务。",
+      "status": "correct",
+      "error_type": null,
+      "error_message": null
+    },
+    {
+      "id": "holdout_resume_002",
+      "input": "面试官问我为什么在项目中使用桥接模式，我应该怎么组织回答才能突出自己的工程能力",
+      "difficulty": "boundary",
+      "expected": "resume",
+      "actual": "resume",
+      "confidence": 0.98,
+      "reason": "用户正在准备面试回答，属于求职面试准备任务",
+      "status": "correct",
+      "error_type": null,
+      "error_message": null
+    },
+    {
+      "id": "holdout_project_001",
+      "input": "我这个工业网关的协议层和传输层已经通过桥接模式解耦，还有必要增加适配器吗",
+      "difficulty": "boundary",
+      "expected": "project",
+      "actual": "project",
+      "confidence": 0.98,
+      "reason": "用户针对自己的工业网关项目，询问协议层和传输层已通过桥接模式解耦后是否还需增加适配器，属于具体项目的架构设计与技术选型问题，因此归类为 project。",
+      "status": "correct",
+      "error_type": null,
+      "error_message": null
+    },
+    {
+      "id": "holdout_project_002",
+      "input": "我以前写的RAG系统如果把向量数据库换掉，会影响哪些模块的接口设计",
+      "difficulty": "boundary",
+      "expected": "project",
+      "actual": "project",
+      "confidence": 0.96,
+      "reason": "用户询问自己以前写的RAG系统在更换向量数据库后会影响哪些模块的接口设计，属于针对具体项目的架构与实现分析。",
+      "status": "correct",
+      "error_type": null,
+      "error_message": null
+    },
+    {
+      "id": "holdout_learning_001",
+      "input": "假设我要设计一个网关，能不能从零解释桥接模式和适配器模式的区别",
+      "difficulty": "boundary",
+      "expected": "learning",
+      "actual": "learning",
+      "confidence": 0.92,
+      "reason": "用户请求从零解释桥接模式和适配器模式的区别，属于通用技术概念学习，而非针对具体项目进行分析或实现",
+      "status": "correct",
+      "error_type": null,
+      "error_message": null
+    },
+    {
+      "id": "holdout_learning_002",
+      "input": "我正在学LangGraph，想理解State中的Reducer为什么不能简单地用普通字典赋值代替",
+      "difficulty": "boundary",
+      "expected": "learning",
+      "actual": "learning",
+      "confidence": 0.98,
+      "reason": "用户正在学习LangGraph框架，询问State中Reducer为何不能简单用普通字典赋值代替，属于通用技术概念与框架原理学习。",
+      "status": "correct",
+      "error_type": null,
+      "error_message": null
+    },
+    {
+      "id": "holdout_memory_001",
+      "input": "不用分析技术方案，先告诉我之前确定的网关项目分层有哪些",
+      "difficulty": "boundary",
+      "expected": "memory_query",
+      "actual": "memory_query",
+      "confidence": 0.98,
+      "reason": "用户明确要求回忆之前已经确定的网关项目分层信息，属于查询历史对话中提供过的内容。",
+      "status": "correct",
+      "error_type": null,
+      "error_message": null
+    },
+    {
+      "id": "holdout_memory_002",
+      "input": "你还记得我之前对RAG项目的技术栈做过哪些选择吗",
+      "difficulty": "boundary",
+      "expected": "memory_query",
+      "actual": "memory_query",
+      "confidence": 0.98,
+      "reason": "用户明确询问是否记得之前对RAG项目技术栈做过的选择，属于查询历史对话中已提供的信息。",
+      "status": "correct",
+      "error_type": null,
+      "error_message": null
+    },
+    {
+      "id": "holdout_fallback_001",
+      "input": "今天有点累，不想讨论项目了，随便聊两句吧",
+      "difficulty": "boundary",
+      "expected": "fallback",
+      "actual": "fallback",
+      "confidence": 0.98,
+      "reason": "用户表示不想讨论项目，只想随便聊两句，属于日常闲聊，无法归入其他具体任务类型",
+      "status": "correct",
+      "error_type": null,
+      "error_message": null
+    },
+    {
+      "id": "holdout_fallback_002",
+      "input": "你觉得人类为什么总喜欢把简单的问题复杂化",
+      "difficulty": "boundary",
+      "expected": "fallback",
+      "actual": "fallback",
+      "confidence": 0.98,
+      "reason": "当前输入是一个关于人类行为的一般性哲学/闲聊问题，与求职、项目开发、技术学习或历史记忆查询均无直接关系，无法归入其他四种任务类型。",
+      "status": "correct",
+      "error_type": null,
+      "error_message": null
+    }
+  ]
+}

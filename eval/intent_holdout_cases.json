@@ -1,0 +1,62 @@
+[
+  {
+    "id": "holdout_resume_001",
+    "input": "我做过一个工业网关项目，但不知道怎么写进简历才能突出技术难点",
+    "expected": "resume",
+    "difficulty": "boundary"
+  },
+  {
+    "id": "holdout_resume_002",
+    "input": "面试官问我为什么在项目中使用桥接模式，我应该怎么组织回答才能突出自己的工程能力",
+    "expected": "resume",
+    "difficulty": "boundary"
+  },
+  {
+    "id": "holdout_project_001",
+    "input": "我这个工业网关的协议层和传输层已经通过桥接模式解耦，还有必要增加适配器吗",
+    "expected": "project",
+    "difficulty": "boundary"
+  },
+  {
+    "id": "holdout_project_002",
+    "input": "我以前写的RAG系统如果把向量数据库换掉，会影响哪些模块的接口设计",
+    "expected": "project",
+    "difficulty": "boundary"
+  },
+  {
+    "id": "holdout_learning_001",
+    "input": "假设我要设计一个网关，能不能从零解释桥接模式和适配器模式的区别",
+    "expected": "learning",
+    "difficulty": "boundary"
+  },
+  {
+    "id": "holdout_learning_002",
+    "input": "我正在学LangGraph，想理解State中的Reducer为什么不能简单地用普通字典赋值代替",
+    "expected": "learning",
+    "difficulty": "boundary"
+  },
+  {
+    "id": "holdout_memory_001",
+    "input": "不用分析技术方案，先告诉我之前确定的网关项目分层有哪些",
+    "expected": "memory_query",
+    "difficulty": "boundary"
+  },
+  {
+    "id": "holdout_memory_002",
+    "input": "你还记得我之前对RAG项目的技术栈做过哪些选择吗",
+    "expected": "memory_query",
+    "difficulty": "boundary"
+  },
+  {
+    "id": "holdout_fallback_001",
+    "input": "今天有点累，不想讨论项目了，随便聊两句吧",
+    "expected": "fallback",
+    "difficulty": "boundary"
+  },
+  {
+    "id": "holdout_fallback_002",
+    "input": "你觉得人类为什么总喜欢把简单的问题复杂化",
+    "expected": "fallback",
+    "difficulty": "boundary"
+  }
+]

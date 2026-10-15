@@ -1,49 +1,66 @@
-from src.agent.graph import graph
+
+import uuid
 
 from langchain_core.messages import HumanMessage
+from src.agent.graph import graph
 
 
 def main():
-    config = {
-            "configurable": {
-                "thread_id": "user_001"
-            }
-        }
+    thread_id = str(uuid.uuid4())
 
-     
+    print("=" * 50)
+    print("Agent Assistant CLI Demo")
+    print("输入 exit 退出，输入 new 开始新会话")
+    print("=" * 50)
+
     while True:
+        try:
+            user_input = input("\nUser: ").strip()
 
-        user_input = input(
-            "请输入:"
-        )
+            if not user_input:
+                continue
 
-        if user_input == "exit":
+            if user_input.lower() in ("exit", "quit"):
+                print("Agent: 再见！")
+                break
+
+            if user_input.lower() == "new":
+                thread_id = str(uuid.uuid4())
+                print("Agent: 已开始新会话。")
+                continue
+
+            state = {
+                "user_input": user_input,
+                "messages": [
+                    HumanMessage(content=user_input)
+                ]
+            }
+
+            config = {
+                "configurable": {
+                    "thread_id": thread_id
+                }
+            }
+
+            result = graph.invoke(
+                state,
+                config=config
+            )
+
+            answer = result.get("final_answer")
+
+            if not answer:
+                answer = "本次执行未生成最终回答，请检查节点输出。"
+
+            print(f"\nAgent: {answer}")
+
+        except (KeyboardInterrupt, EOFError):
+            print("\nAgent: 已退出。")
             break
 
+        except Exception as e:
+            print(f"\nAgent运行失败: {e}")
 
-        initial_state = {
-            "user_input": user_input,
-            "messages": [
-                HumanMessage(content=user_input)
-            ],
-            "task_type":"",
-            "confidence":0,
-            "analysis_result":"",
-            "final_answer":""
-        }
 
-        
-        result = graph.invoke(
-            initial_state,
-            config=config
-        )
-       
-        print("任务类型:", result["task_type"])
-        print("置信度:", result["confidence"])
-        print("分析:", result["analysis"])
-        print("回答:", result["final_answer"])
-        print(result["messages"])
-   
-    
 if __name__ == "__main__":
     main()

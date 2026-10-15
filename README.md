@@ -1,318 +1,216 @@
-# LangGraph 多任务智能 Agent 助手系统
+# Multi-Task AI Agent
 
-基于 LangGraph 构建的多任务智能 Agent 应用系统，通过状态管理、任务分类、条件路由、工具封装以及大模型调用，实现针对不同用户目标的智能任务处理。
+基于 LangGraph 的多任务智能助手，支持意图识别、任务路由、用户长期记忆管理、工具调用及自动化评估。
 
-系统支持用户根据需求选择不同任务方向，包括：
+## 1. 项目简介
 
-- 求职 / 简历优化建议
-- Agent 项目复刻指导
-- Agent 学习路线规划
+本项目基于 Python、LangGraph 和大语言模型构建，面向简历辅助、项目分析、技术学习及个人信息记忆等场景。
 
-通过 LangGraph 的 StateGraph 架构，将用户输入分析、任务路由、业务处理以及 LLM 生成过程进行模块化设计，实现一个可扩展的智能 Agent 工作流。
+系统通过 Intent Classifier 识别用户需求，并利用 LangGraph StateGraph 的条件路由机制，将请求分发到对应的任务节点。同时设计用户资料提取与长期记忆机制，使系统能够在不同会话中复用已保存的用户信息。
 
----
+项目重点探索多任务 Agent 工作流编排、结构化输出、状态管理、记忆机制、异常处理及自动化评估。
 
-# 项目背景
+## 2. 核心功能
 
-传统的大语言模型应用通常采用：
+| 功能模块 | 实现内容 |
+|---|---|
+| 意图识别 | 基于 LLM 对用户请求进行分类，输出任务类型与置信度 |
+| 动态任务路由 | 通过 LangGraph 条件边分发到不同业务节点 |
+| 多任务处理 | 支持简历辅助、项目分析、技术学习、记忆查询及兜底回答 |
+| 长期记忆 | 自动识别需要保存的用户信息，提取并更新用户资料 |
+| 会话状态 | 使用 LangGraph Checkpointer 管理会话状态 |
+| 工具调用 | 在项目分析节点中集成 GitHub 工具 |
+| 结构化输出 | 使用 Pydantic 校验模型输出 |
+| 异常处理 | 对解析错误、校验失败和部分调用异常进行处理或降级 |
+| 自动化评估 | 使用独立测试集评估意图识别效果，并生成评估报告 |
 
+## 3. 技术栈
 
-用户输入
-↓
-LLM
-↓
-生成回答
+- Python 3.10
+- LangGraph：工作流编排、状态管理与条件路由
+- LangChain：消息对象与大模型调用相关组件
+- Pydantic：结构化数据校验
+- LLM API：意图识别、信息提取与任务回答
+- JSON：用户资料及评估结果存储
+- Python unittest：自动化测试
+- uv：Python 项目依赖管理
 
+## 4. 系统架构
 
-这种方式存在以下问题：
+```mermaid
+flowchart TD
+    A["用户输入"] --> B["Memory Trigger"]
+    B --> C{"是否需要更新记忆"}
+    C -->|是| D["Profile Extractor"]
+    C -->|否| E["Intent Classifier"]
+    D --> F["Profile Store"]
+    D --> E
+    E --> G{"任务类型与置信度"}
+    G -->|Resume| H["Resume Agent"]
+    G -->|Project| I["Project Agent"]
+    G -->|Learning| J["Learning Agent"]
+    G -->|Memory Query| K["Memory Query"]
+    G -->|其他或低置信度| L["Fallback"]
+    I -.-> M["GitHub Tool"]
+    H --> N["最终回答"]
+    I --> N
+    J --> N
+    K --> N
+    L --> N
+```
 
-- 无法根据不同任务进行流程控制
-- 复杂任务难以拆分
-- 业务逻辑和模型调用耦合严重
-- 后续扩展新的能力成本较高
+### 4.1 意图识别与任务路由
 
-因此，本项目基于 LangGraph 构建 Agent 工作流，通过：
+系统通过独立的 Intent Classifier 识别用户输入，得到任务类型和分类置信度。
 
-- State 状态管理
-- 节点化任务处理
-- 条件分支路由
-- 工具函数封装
+支持以下五类任务：
 
-实现更加工程化、可扩展的智能 Agent 系统。
+- `resume`：简历相关辅助
+- `project`：项目分析与技术建议
+- `learning`：技术学习指导
+- `memory_query`：历史用户信息查询
+- `fallback`：未匹配任务或低置信度请求处理
 
----
+通过 LangGraph 的 Conditional Edges，根据分类结果决定执行路径。
 
-# 系统架构
+### 4.2 长期记忆机制
 
-整体执行流程：
+系统将会话状态与用户长期资料分开管理。
 
-                用户输入
-                   |
-                   ↓
-          analyze_input 节点
-                   |
-      生成 task_type 和 analysis_result
-                   |
-                   ↓
-            route_task 路由
-                   |
-    ┌──────────────┼──────────────┐
-    ↓              ↓              ↓
+短期会话状态由 LangGraph State 和 Checkpointer 管理，用于维持当前会话的上下文。
 
-resume_response project_response learning_response
+长期用户资料由 Profile Store 管理，支持提取、合并、保存和读取用户信息。
 
-    ↓              ↓              ↓
+当 Memory Trigger 判断用户输入包含值得保存的信息时，系统调用 Profile Extractor，使用结构化输出提取相关字段，并更新用户资料。
 
-generate_resume generate_project generate_learning
-_advice _advice _advice
+### 4.3 异常处理
 
-    └──────────────┼──────────────┘
-                   |
-                   ↓
+项目对关键 LLM 调用和数据解析过程进行异常处理，包括：
 
-             call_llm()
+- 非法 JSON 输出
+- Pydantic Schema 校验失败
+- LLM 调用失败
+- 部分可重试的网络或服务错误
+- 用户资料保存失败
+- 意图识别异常时的 fallback 降级
 
-                   |
-                   ↓
+通过统一异常类型和调用封装，减少异常向业务节点扩散。
 
-          生成最终回答
+## 5. 项目目录
 
-                   |
-                   ↓
-
-                END
-
----
-
-# 核心功能
-
-## 1. 基于 StateGraph 的 Agent 工作流
-
-使用 LangGraph 的 StateGraph 构建 Agent 执行流程。
-
-通过 State 保存：
-
-```python
-class State(TypedDict):
-    messages: Sequence[BaseMessage]
-    user_input: str
-    task_type: str
-    analysis_result: str
-    final_answer: str
-
-其中：
-
-字段	作用
-user_input	保存用户原始输入
-task_type	保存任务分类结果，用于路由
-analysis_result	保存用户需求分析结果
-final_answer	保存最终生成内容
-messages	保存对话消息历史
-2. 用户意图分析与任务路由
-
-系统首先分析用户输入，根据关键词判断用户目标：
-
-例如：
-
-我想优化我的简历
-        ↓
-task_type = resume
-我想复刻一个GitHub Agent项目
-        ↓
-task_type = project
-我想学习Agent
-        ↓
-task_type = learning
-
-随后通过条件边：
-
-add_conditional_edges()
-
-动态选择对应处理节点。
-
-3. 工具函数模块化设计
-
-将不同任务能力封装为独立工具：
-
-generate_resume_advice()
-
-generate_project_advice()
-
-generate_learning_advice()
-
-节点负责：
-
-控制流程
-读取 State
-更新 State
-
-工具负责：
-
-构造 Prompt
-调用具体能力
-
-实现：
-
-流程控制
-    +
-业务能力
-    +
-LLM调用
-
-的职责分离。
-
-4. LLM 调用封装
-
-通过统一函数：
-
-call_llm()
-
-完成：
-
-API Key 管理
-模型初始化
-参数配置
-异常处理
-
-模型采用：
-
-Qwen3-Max
-
-通过 DashScope OpenAI-compatible API 调用。
-
-技术栈
-开发语言
-Python
-Agent框架
-LangGraph
-LangChain Core
-大模型
-Qwen3-Max
-DashScope OpenAI-compatible API
-工程能力
-State Management
-Prompt Engineering
-Workflow Orchestration
-Environment Configuration
-Exception Handling
-项目结构
+```text
 project_root/
-
-├── main.py                 # 项目启动入口
-
-├── langgraph.json           # LangGraph运行配置
-
+├── main.py                 # CLI 演示入口
+├── evaluate_agent.py       # Agent 评估脚本
+├── run_all_tests.py        # 自动化测试入口
+├── pyproject.toml          # 项目依赖配置
+├── langgraph.json          # LangGraph 配置
 ├── src/
 │   └── agent/
-│       ├── graph.py         # Agent核心流程定义
-│       └── __init__.py
+│       ├── graph.py        # LangGraph 工作流定义
+│       ├── state.py        # State 定义
+│       ├── llm.py          # LLM 初始化
+│       ├── nodes/          # Agent 业务节点
+│       ├── prompts/        # Prompt 模板
+│       ├── schemas/        # Pydantic Schema
+│       ├── memory/         # 用户资料存储
+│       ├── tools/          # GitHub 工具
+│       └── utils/          # 日志、异常、解析及调用工具
+├── tests/                  # 自动化测试
+└── eval/                   # 评估数据集与报告
+```
 
-├── .env.example             # 环境变量模板
+## 6. 快速开始
 
-├── pyproject.toml           # 项目依赖配置
+### 6.1 环境要求
 
-└── README.md
-环境配置
-1. 创建虚拟环境
+推荐 Python 3.10。
 
-推荐使用 uv：
+项目使用 `pyproject.toml` 和 `uv.lock` 管理依赖。
 
+```bash
 uv sync
+```
 
-或者：
+按照 `.env.example` 创建 `.env` 文件，并填写项目所需的大模型 API 配置。
 
-pip install -r requirements.txt
-2. 配置环境变量
+### 6.2 运行 CLI Demo
 
-复制：
-
-.env.example
-
-修改为：
-
-.env
-
-填写：
-
-DASHSCOPE_API_KEY=your_api_key
-
-DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-
-DASHSCOPE_MODEL=qwen3-max
-
-DASHSCOPE_TEMPERATURE=0.7
-运行项目
-
-执行：
-
+```bash
 python main.py
+```
 
-输入示例：
+示例：
 
-我想学习Agent
+```text
+User: 什么是 LangGraph 的 State？
 
-系统执行：
+Agent: State 可以理解为工作流中的共享状态，
+不同节点读取状态并返回更新，
+LangGraph 根据状态更新和路由规则推进执行。
+```
 
-用户输入
+支持输入 `new` 开始新会话，输入 `exit` 退出程序。
 
-↓
+### 6.3 自动化测试
 
-任务分析
+```bash
+python run_all_tests.py
+```
 
-↓
+当前测试结果：
 
-Agent路由
+```text
+Ran 27 tests
 
-↓
+OK
+```
 
-对应任务处理
+## 7. 测试与评估
 
-↓
+### 7.1 自动化测试
 
-LLM生成回答
-项目亮点
-1. Agent工作流设计
+项目使用 Python unittest 测试关键功能。
 
-通过 LangGraph 将复杂任务拆解为多个节点，实现：
+| 测试模块 | 用例数量 |
+|---|---:|
+| Intent Classifier | 6 |
+| Graph Routing | 5 |
+| Memory | 6 |
+| Profile Extractor | 4 |
+| Memory Pipeline | 3 |
+| Checkpoint Memory | 3 |
+| 总计 | 27 |
 
-可视化流程控制
-状态传递
-条件分支
-2. 模块化架构
+最近一次测试结果：27/27 通过。
 
-通过：
+### 7.2 意图识别评估
 
-Node
-+
-Tool
-+
-LLM
+项目构建了独立的意图分类评估数据集，并通过自动化脚本执行评估。
 
-分离设计，提高系统可维护性和扩展能力。
+在已完成的 50 条样例评估中，分类正确率为 100%（50/50）。
 
-3. 可扩展任务体系
+评估报告记录数据集路径、数据集 SHA256、Prompt 版本及逐条预测结果等信息，便于结果追溯和不同实验之间的比较。
 
-新增任务类型时，只需要：
+**说明：** 该准确率仅反映特定评估集上的测试表现，不代表真实环境中的泛化准确率。
 
-增加新的 task_type
-添加对应 response 节点
-添加对应工具函数
+## 8. 项目设计特点
 
-无需修改整体 Agent 架构。
+**模块化工作流：** 将意图识别、记忆处理和任务回答拆分为独立节点，便于测试、维护和功能扩展。
 
-后续优化方向
-接入真实 Tool Calling
-增加多轮对话 Memory
-支持更多任务类型
-增加 Web UI 展示
-增加日志系统和测试模块
-项目总结
+**状态与长期记忆分离：** 区分会话执行状态和持久化用户资料，避免将两者混为同一概念。
 
-本项目实现了一个基于 LangGraph 的多任务智能 Agent 系统，通过状态管理、条件路由、工具封装以及大模型调用，实现从用户需求分析到任务执行的完整 Agent 工作流。
+**结构化输出校验：** 使用 Pydantic 验证关键 LLM 输出，降低格式异常对工作流的影响。
 
-该项目重点实践了 Agent 应用开发中的核心技术：
+**可测试性：** 对分类、路由、记忆更新和异常场景分别设计测试用例，并使用独立评估数据集验证分类表现。
 
-Agent Workflow Design
-State Management
-Prompt Engineering
-LLM Application Development
+## 9. 后续优化方向
+
+- 扩展意图识别评估数据集，提高边界场景覆盖率
+- 增加完整工作流集成测试
+- 优化任务节点的回答质量与工具调用策略
+- 根据实际使用需求增加 Web 交互界面
+
+## 10. 项目定位
+
+本项目是一个面向 AI Agent 应用开发学习与实践的个人项目，重点在于掌握 LangGraph 工作流编排、多任务路由、LLM 结构化输出、用户记忆管理以及 Agent 测试评估方法。

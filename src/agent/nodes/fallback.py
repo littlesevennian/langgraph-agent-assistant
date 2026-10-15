@@ -1,26 +1,22 @@
 from ..state import State
 from ..llm import llm
+from ..utils.llm_client import invoke_llm
 
 from langchain_core.messages import AIMessage
+from ..prompts.fallback import FALLBACK_PROMPT
 
 def fallback_response(state: State) -> dict:
     user_input = state["user_input"]
 
-    prompt = f"""
-我暂时无法准确判断您关于：
+    prompt = FALLBACK_PROMPT.format(
+        user_input=user_input
+    )
 
-"{user_input}"
-
-的具体需求。
-
-请进一步说明您的目标：
-
-1. Agent学习路线
-2. Agent项目开发
-3. 求职和面试准备
-"""
-
-    response = llm.invoke(prompt)
+    response = invoke_llm(
+        runnable=llm,
+        input_data=prompt,
+        caller="fallback_agent"
+    )
     
     message = AIMessage(content=response.content)
 

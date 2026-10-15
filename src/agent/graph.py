@@ -1,13 +1,7 @@
 import os
-
-
 from dotenv import load_dotenv
 
 from langgraph.graph import END, START, StateGraph
-from langgraph.prebuilt import ToolNode, tools_condition
-
-
-from .tools.github_tool import github_analyzer
 
 from .state import State
 
@@ -78,14 +72,7 @@ def route_task(state: State) -> str:
     else:
         return "fallback_response"
     
-    
 
-tools = [
-    github_analyzer
-]
-
-
-tool_node = ToolNode(tools)
 
 
 workflow = StateGraph(State)
@@ -94,7 +81,6 @@ workflow.add_node("resume_response", resume_response)
 workflow.add_node("project_agent",project_agent)
 workflow.add_node("learning_response", learning_response)
 workflow.add_node("fallback_response",fallback_response)
-workflow.add_node("tools",tool_node)
 workflow.add_node("memory",memory_check_node)
 workflow.add_node("memory_query",memory_query_response)
 workflow.add_node("memory_trigger",memory_trigger_node)
@@ -150,8 +136,7 @@ workflow.add_edge("resume_response", END)
 workflow.add_edge("learning_response", END)
 workflow.add_edge( "memory_query",END)
 workflow.add_edge("fallback_response",END)
-workflow.add_conditional_edges("project_agent",tools_condition)
-workflow.add_edge("tools","project_agent")
+workflow.add_edge("project_agent", END)
 
 
 

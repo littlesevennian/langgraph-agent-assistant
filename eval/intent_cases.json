@@ -1,0 +1,306 @@
+[
+    {
+        "id": "intent_resume_001",
+        "input": "帮我优化一下简历",
+        "expected": "resume",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_resume_002",
+        "input": "我的嵌入式项目经历应该怎么写进简历",
+        "expected": "resume",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_resume_003",
+        "input": "帮我修改一下简历里的项目描述",
+        "expected": "resume",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_resume_004",
+        "input": "我准备投嵌入式软件工程师，这段工作经历应该怎么写比较合适",
+        "expected": "resume",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_resume_005",
+        "input": "这段项目经历写得有点流水账，帮我改得更适合找工作",
+        "expected": "resume",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_resume_006",
+        "input": "我做过STM32和FreeRTOS项目，怎么在求职材料里体现技术深度",
+        "expected": "resume",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_resume_007",
+        "input": "我这个RAG项目应该怎么描述才能让面试官快速看懂",
+        "expected": "resume",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_resume_008",
+        "input": "我之前做过一个RAG系统，把它整理成一段可以放进简历的项目经历",
+        "expected": "resume",
+        "difficulty": "boundary"
+    },
+    {
+        "id": "intent_resume_009",
+        "input": "先不用分析代码，我主要想知道这个网关项目在简历里应该突出哪些内容",
+        "expected": "resume",
+        "difficulty": "boundary"
+    },
+    {
+        "id": "intent_resume_010",
+        "input": "我在学习LangGraph，也做了一个Agent项目，这部分求职时应该怎么写",
+        "expected": "resume",
+        "difficulty": "boundary"
+    },
+
+    {
+        "id": "intent_project_001",
+        "input": "帮我分析一下这个项目的架构",
+        "expected": "project",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_project_002",
+        "input": "这个项目代码结构合理吗",
+        "expected": "project",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_project_003",
+        "input": "帮我看看这个项目还有哪些地方可以优化",
+        "expected": "project",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_project_004",
+        "input": "我的Agent现在把Memory和Intent分成两个Node，这个设计合理吗",
+        "expected": "project",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_project_005",
+        "input": "这个GitHub仓库的目录结构为什么这样设计",
+        "expected": "project",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_project_006",
+        "input": "我的RAG检索效果不好，帮我从代码和架构上分析可能的问题",
+        "expected": "project",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_project_007",
+        "input": "项目里的Tool调用失败以后现在直接降级，这套处理方式有没有问题",
+        "expected": "project",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_project_008",
+        "input": "我简历里写了这个Agent项目，你先别管简历表达，帮我分析一下它的架构缺陷",
+        "expected": "project",
+        "difficulty": "boundary"
+    },
+    {
+        "id": "intent_project_009",
+        "input": "我之前做的RAG项目为什么需要把检索和生成分开设计",
+        "expected": "project",
+        "difficulty": "boundary"
+    },
+    {
+        "id": "intent_project_010",
+        "input": "我正在学习LangGraph，不过现在主要想解决我这个Agent项目的State设计问题",
+        "expected": "project",
+        "difficulty": "boundary"
+    },
+
+    {
+        "id": "intent_learning_001",
+        "input": "给我讲一下LangGraph的Reducer",
+        "expected": "learning",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_learning_002",
+        "input": "什么是Precision和Recall",
+        "expected": "learning",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_learning_003",
+        "input": "教我理解Agent中的Tool Calling",
+        "expected": "learning",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_learning_004",
+        "input": "我一直分不清Checkpoint和Long-term Memory，详细解释一下",
+        "expected": "learning",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_learning_005",
+        "input": "为什么异步IO可以提高服务器并发，但不会让一次LLM推理本身变快",
+        "expected": "learning",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_learning_006",
+        "input": "我想系统学习一下Pydantic在Agent项目里主要解决什么问题",
+        "expected": "learning",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_learning_007",
+        "input": "能不能用一个实际例子让我理解什么叫Graceful Degradation",
+        "expected": "learning",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_learning_008",
+        "input": "我的项目里用了Reducer，但先不要分析我的代码，我想先理解Reducer本身的工作原理",
+        "expected": "learning",
+        "difficulty": "boundary"
+    },
+    {
+        "id": "intent_learning_009",
+        "input": "我准备面试Agent岗位，先教我理解ReAct和Workflow到底有什么区别",
+        "expected": "learning",
+        "difficulty": "boundary"
+    },
+    {
+        "id": "intent_learning_010",
+        "input": "我之前项目里用过向量数据库，但我现在想重新学习Embedding到底是什么",
+        "expected": "learning",
+        "difficulty": "boundary"
+    },
+
+    {
+        "id": "intent_memory_001",
+        "input": "你还记得我的职业是什么吗",
+        "expected": "memory_query",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_memory_002",
+        "input": "我之前告诉过你我会哪些技术",
+        "expected": "memory_query",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_memory_003",
+        "input": "你记得我之前做过什么项目吗",
+        "expected": "memory_query",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_memory_004",
+        "input": "根据你之前记住的信息，说一下我目前的技术栈",
+        "expected": "memory_query",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_memory_005",
+        "input": "我之前是不是跟你说过我在学习LangGraph",
+        "expected": "memory_query",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_memory_006",
+        "input": "不用重新问我背景，直接告诉我你目前记得我的哪些职业信息",
+        "expected": "memory_query",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_memory_007",
+        "input": "回顾一下我之前提到过的项目经历",
+        "expected": "memory_query",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_memory_008",
+        "input": "先别分析项目，你还记得我之前那个RAG项目用了哪些技术吗",
+        "expected": "memory_query",
+        "difficulty": "boundary"
+    },
+    {
+        "id": "intent_memory_009",
+        "input": "不是让你教我LangGraph，我只是想确认一下我之前有没有告诉过你我学过它",
+        "expected": "memory_query",
+        "difficulty": "boundary"
+    },
+    {
+        "id": "intent_memory_010",
+        "input": "我想写简历之前先确认一下，你目前记得我做过哪些项目",
+        "expected": "memory_query",
+        "difficulty": "boundary"
+    },
+
+    {
+        "id": "intent_fallback_001",
+        "input": "你好",
+        "expected": "fallback",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_fallback_002",
+        "input": "谢谢",
+        "expected": "fallback",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_fallback_003",
+        "input": "你是谁",
+        "expected": "fallback",
+        "difficulty": "easy"
+    },
+    {
+        "id": "intent_fallback_004",
+        "input": "今天心情不错",
+        "expected": "fallback",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_fallback_005",
+        "input": "随便聊聊吧",
+        "expected": "fallback",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_fallback_006",
+        "input": "给我讲个笑话",
+        "expected": "fallback",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_fallback_007",
+        "input": "晚上吃什么比较好",
+        "expected": "fallback",
+        "difficulty": "normal"
+    },
+    {
+        "id": "intent_fallback_008",
+        "input": "我最近在学Python，不过今天不想学习，就随便聊聊天",
+        "expected": "fallback",
+        "difficulty": "boundary"
+    },
+    {
+        "id": "intent_fallback_009",
+        "input": "简历终于写完了，谢谢你，今天先到这里",
+        "expected": "fallback",
+        "difficulty": "boundary"
+    },
+    {
+        "id": "intent_fallback_010",
+        "input": "项目的问题已经解决了，暂时不用继续分析",
+        "expected": "fallback",
+        "difficulty": "boundary"
+    }
+]

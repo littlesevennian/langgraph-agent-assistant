@@ -1,5 +1,6 @@
 from ..state import State
 from ..llm import llm
+from ..utils.llm_client import invoke_llm
 
 
 SUMMARY_THRESHOLD = 6
@@ -27,7 +28,11 @@ def memory_check_node(state: State):
 """
 
 
-    response = llm.invoke(prompt)
+    response = invoke_llm(
+        runnable=llm,
+        input_data=prompt,
+        caller="memory_agent"
+    )
 
 
     return {
